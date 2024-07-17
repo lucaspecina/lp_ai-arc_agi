@@ -3,6 +3,7 @@ import os
 import json
 
 from setup.output_parsing import get_task_prediction
+import random
 
 def run_model(llm, challenges, NUM_ATTEMPTS=2, RETRY_ATTEMPTS=3, NUM_TASKS=None, verbose=False):
     """
@@ -17,8 +18,15 @@ def run_model(llm, challenges, NUM_ATTEMPTS=2, RETRY_ATTEMPTS=3, NUM_TASKS=None,
     # A dict to hold your submissions that you'll return after all predictions are made
     submission = {}
 
-    # Run through each task in your challenge set
-    for i, task_id in enumerate(challenges):
+    # Set the seed for reproducibility
+    # random.seed(42)
+
+    # Shuffle the task IDs
+    shuffled_task_ids = list(challenges.keys())
+    random.shuffle(shuffled_task_ids)
+
+    # Run through each task in the shuffled order
+    for i, task_id in enumerate(shuffled_task_ids):
         task_attempts = []  # List to store all attempts for the current task
 
         # Go through each test pair to get a prediction. 96% of challenges have 1 pair.
@@ -65,5 +73,3 @@ def run_model(llm, challenges, NUM_ATTEMPTS=2, RETRY_ATTEMPTS=3, NUM_TASKS=None,
             break
 
     return submission
-
-
