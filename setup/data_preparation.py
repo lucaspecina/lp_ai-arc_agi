@@ -21,9 +21,6 @@ task_sets = {
 }
 
 def load_tasks_from_file(task_set):
-    """
-    Loads the tasks from the file and returns the challenges and solutions tasks
-    """
     with open(task_set['challenges'], "r") as tasks:
         challenges = json.load(tasks)
 
@@ -36,13 +33,6 @@ challenges, solutions = load_tasks_from_file(task_set=task_sets['training'])
 
 
 def json_task_to_string(challenge_tasks: dict, task_id: str, test_input_index: int) -> str:
-    """
-    challenge_tasks: dict a list of tasks
-    task_id: str the id of the task we want to convert to a string
-    
-    Convert your json task into a string so you can pass it to your LLM.
-    This is a crucial step where you can use your creativity to edit how tasks are represented.
-    """
     json_task = challenge_tasks[task_id]
 
     final_output = "I will present a series of examples to you. Each example will have an input and an output. You will need to predict the output for the test example. You need to find the logical pattern for each input and the output for all the examples and follow the same logic to produce the output for the test case.\n\n"

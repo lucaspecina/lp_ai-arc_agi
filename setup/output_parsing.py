@@ -2,9 +2,6 @@ import json
 
 
 def parse_output(output, verbose=False):
-    """
-    Parse the output from the model
-    """
     # TODO: add functionality for Chain of Thought -> should be able to generate reasoning steps 
     # and after a key word (answer) say the answer in the right format (see implementations of CoT)
     # Because the output is structured, get the prediction key. If it isn't there, then just get the output
@@ -22,11 +19,10 @@ def parse_output(output, verbose=False):
         raise ValueError("Failed: Output must be a list of lists of integers.")
     else:
         print('Success')
-    
-    # Let's find the shape of our prediction
+    # shape of the predictions
     num_rows = len(prediction)
     num_cols = len(prediction[0]) if num_rows > 0 else 0
-    
+
     if verbose:
         print(f"Prediction Grid Size: {num_rows}x{num_cols}\n")
         print(f"Prediction: \n{prediction}")
@@ -35,9 +31,6 @@ def parse_output(output, verbose=False):
 
 
 def create_submission_file(submission, file_name='submissions/submission.json'):
-    """
-    Save a submission file to the specified file name
-    """
     with open(file_name, "w") as file:
         json.dump(submission, file)
     
