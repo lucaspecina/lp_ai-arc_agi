@@ -1,52 +1,12 @@
-from langchain_core.output_parsers import JsonOutputParser # To help with structured output
-from langchain_core.prompts import PromptTemplate # To help create our prompt
-from langchain_core.pydantic_v1 import BaseModel, Field # To help with defining what output structure we want
-
-from typing import List, Tuple
-import os
 import json
-from setup.data_preparation import json_task_to_string
 
-# Defining a prediction as a list of lists
-class ARCPrediction(BaseModel):
-    prediction: List[List] = Field(..., description="A prediction for a task")
 
-def get_task_prediction(llm, challenge_tasks, task_id, test_input_index, verbose=False) -> List[List]:
+def parse_output(output, verbose=False):
     """
-    challenge_tasks: dict a list of tasks
-    task_id: str the id of the task we want to get a prediction for
-    test_input_index: the index of your test input. 96% of tests only have 1 input.
-
-    Given a task, predict the test output
+    Parse the output from the model
     """
-
-    # Get the string representation of your task
-    task_string = json_task_to_string(challenge_tasks, task_id, test_input_index)
-    
-    # Set up a parser to inject instructions into the prompt template.
-    parser = JsonOutputParser(pydantic_object=ARCPrediction)
-
-    # Create your prompt template. This is very rudimentary! You should edit this to do much better.
-    # For example, we don't tell the model what it's first attempt was (so it can do a different one), that might help!
-    prompt = PromptTemplate(
-        template="You are a bot that is very good at solving puzzles. Below is a list of input and output pairs with a pattern." 
-                    "Identify the pattern, then apply that pattern to the test input to give a final output"
-                    "Just give valid json list of lists response back, nothing else. Do not explain your thoughts."
-                    "{format_instructions}\n{task_string}\n",
-        input_variables=["task_string"],
-        partial_variables={"format_instructions": parser.get_format_instructions()},
-    )
-
-    # Wrap up your chain with LCEL
-    chain = prompt | llm | parser
-
-    # Optional, print out the prompt if you want to see it. If you use LangSmith you could view this there as well.
-    if verbose:
-        print (f"Prompt:\n\n{prompt.format(task_string=task_string)}")
-    
-    # Finally, go get your prediction from your LLM. Ths will make the API call.
-    output = chain.invoke({"task_string": task_string})
-
+    # TODO: add functionality for Chain of Thought -> should be able to generate reasoning steps 
+    # and after a key word (answer) say the answer in the right format (see implementations of CoT)
     # Because the output is structured, get the prediction key. If it isn't there, then just get the output
     if isinstance(output, dict):
         prediction = output.get('prediction', output)

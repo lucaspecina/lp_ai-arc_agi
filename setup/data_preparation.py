@@ -69,6 +69,6 @@ def json_task_to_string(challenge_tasks: dict, task_id: str, test_input_index: i
     for row in test_task[test_input_index]['input']:
         final_output += f"\n{str(row)}"
 
-    final_output += "]\n\nYour Response (reply only with the solution. No explanation):"
+    final_output += "]\n\nYour Response:"
 
     return final_output
