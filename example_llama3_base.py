@@ -1,4 +1,5 @@
 from langchain_community.llms import Ollama
+from langchain_ollama import ChatOllama
 import argparse
 
 from setup.run import main
@@ -24,7 +25,8 @@ if __name__ == "__main__":
     else:
         raise ValueError(f"Invalid model: {args.model}")
     
-    llm = Ollama(model=args.model)
+    # llm = Ollama(model=args.model)
+    llm = ChatOllama(model="llama3", temperature=0, max_tokens=1000)
     
     if args.verbose:
         print(f'Testing {model_name}: "Describe en 20 palabras el ARC-AGI Challenge"')
