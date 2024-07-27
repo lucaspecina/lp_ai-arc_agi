@@ -10,7 +10,7 @@ import argparse
 from collections import Counter
 
 
-def main(verbose, task_id, num_generators, num_iterations):
+def main(task_id, num_generators, num_iterations, verbose):
     
     # Load task
     challenges, solutions = load_tasks_from_file(task_sets['training'])
@@ -87,4 +87,4 @@ if __name__ == "__main__":
     print(f"Number of generators: {args.num_generators}")
     print(f"Verbose: {args.verbose}")
     print(f"Number of iterations: {args.num_iterations}")
-    main(args.verbose, args.task_id, args.num_generators, args.num_iterations)
+    main(args.task_id, args.num_generators, args.num_iterations, args.verbose)

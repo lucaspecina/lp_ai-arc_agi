@@ -6,12 +6,12 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 # TOOL
 # Data model
 class CombineSolutionsTool(BaseModel):
-    reasoning: str = Field(description="Chain of thought process explaining step by step the reasoning of the solution.")
+    # reasoning: str = Field(description="Chain of thought process explaining step by step the reasoning of the solution.")
     patterns: str = Field(description="Enumerate the patterns used to solve the problem.")
     # imports: str = Field(description="Code block import statements")
     # code: str = Field(description="Code block not including import statements")
-    description = "Schema for code solutions to questions about the challenge."
     test_output: str = Field(description="Output for the TEST case (applying the patterns).")
+    description = "Schema for code solutions to questions about the challenge."
 
 
 def combination(state: GraphState):
