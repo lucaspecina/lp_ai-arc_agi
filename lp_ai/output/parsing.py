@@ -1,5 +1,8 @@
 import ast
 import numpy as np
+from langchain_core.messages import AIMessage
+from typing import List
+import json
 
 def check_output(tool_output):
     # print("\n----------------------------------------------\nTool Output:\n")
@@ -19,7 +22,7 @@ def check_output(tool_output):
     return tool_output
 
 def parse_output(solution):
-    print("Final Parsed Output:", solution["parsed"])
+    # print("Final Parsed Output:", solution["parsed"])
     return solution["parsed"]
 
 def insert_errors(inputs):
@@ -37,6 +40,22 @@ def insert_errors(inputs):
         "messages": messages,
         "context": inputs["context"],
     }
+
+# Custom parser for list of strings (patterns)
+def extract_list(message: dict) -> List[str]:
+    """
+    Extract a list of strings from a message content.
+    """
+    try:
+        patterns_str = message['raw'].tool_calls[0]['args']['patterns']
+        patterns_list = json.loads(patterns_str)
+        # message['raw'].tool_calls[0]['args']['patterns'] = patterns_list
+        # set parsing error to None and parsed to True
+        message['parsing_error'] = None
+        message["parsed"] = patterns_list
+        return message
+    except:
+        raise ValueError(f"Failed to extract list of patterns: {message}")
 
 def validate_output(test_task, solutions, task_id, test_output):
     prediction = ast.literal_eval(test_output)
