@@ -6,4 +6,4 @@ class GraphState(TypedDict):
     error: str
     messages: Annotated[list, operator.add]
     # iterations: int
-    generation: str
+    # generation: str

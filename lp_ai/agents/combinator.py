@@ -48,11 +48,12 @@ def combination(state: GraphState):
 )
     combinator_llm = setup_llm("llama3.1").with_structured_output(CombineSolutionsTool, include_raw=True) # gpt-4o
 
-    # build chain
+    # chain setup
     combinator_chain = combinator_prompt | combinator_llm | check_output
-    # # This will be run as a fallback chain
-    fallback_chain = insert_errors | combinator_chain
+    # This will be run as a fallback chain
     N = 3
+    fallback_chain = insert_errors | combinator_chain
+    
     combinator_chain_retry = combinator_chain.with_fallbacks(fallbacks=[fallback_chain] * N, exception_key="error")
     combinator_chain = combinator_chain_retry | parse_output
     
