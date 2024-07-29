@@ -1,4 +1,6 @@
 import numpy as np 
+from collections import Counter
+import ast
 
 def test_task(gen_code, challenges, solutions, task_id):
     code_namespace = {}
@@ -41,3 +43,38 @@ def test_task(gen_code, challenges, solutions, task_id):
     
     return solve
 
+def test_task_multiple(final_answers, challenges, solutions, task_id):
+    # Test example
+    # MOST REPEATED ANSWER
+    print('\n--------------------------------- MOST REPEATED ANSWER ---------------------------------')
+    answers_count = Counter(final_answers)
+    print(f"Task ID: {task_id}")
+    print('\nTEST EXAMPLE:')
+    test_task = challenges[task_id]['test'][0]
+    prediction = ast.literal_eval(answers_count.most_common(1)[0][0])
+    print('input:', test_task['input'])
+    print('output:', np.array(solutions[task_id][0]).shape)
+    print(np.array(solutions[task_id][0]))
+    print('prediction:', np.array(prediction).shape)
+    print(np.array(prediction))
+    print('Score:', prediction == solutions[task_id][0])
+
+    # ALL ANSWERS
+    print('\n--------------------------------- ALL ANSWERS ---------------------------------')
+    print(f"Task ID: {task_id}")
+    print('\nTEST EXAMPLE:')
+    print('input:', test_task['input'])
+    print('output:', np.array(solutions[task_id][0]).shape)
+    print(np.array(solutions[task_id][0]))
+
+    for i, answer in enumerate(final_answers):
+        try:
+            prediction = ast.literal_eval(answer)
+            print(f'Score answer {i+1}:', prediction == solutions[task_id][0])
+            if prediction == solutions[task_id][0]:
+                print('prediction:', np.array(prediction).shape)
+                print(np.array(prediction))
+        except:
+            print(f"Answer {i+1}: Bad format")
+            print(answer)
+    

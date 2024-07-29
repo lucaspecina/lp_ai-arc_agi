@@ -18,6 +18,8 @@ def generate_patterns(state: GraphState):
     messages = state["messages"]
     error = state["error"]
 
+    task_string = messages[0][1]
+
     if error == "yes":
         messages += [("user", "Now, try again. Invoke the code tool to structure the output with a reasoning, imports, and code block:",)]
 
@@ -31,7 +33,6 @@ def generate_patterns(state: GraphState):
         Analyze the given input-output examples and determine 5 patterns or rules that are consistent across all examples.
         Hint: imagine the problem as a grid. Each number represents a different color. Imagine it visually and identify the pattern. Be very careful with the shape of the grids and identify the patterns for the inputs and outputs.
         Use the "PatternsExtractionTool" tool to structure the output correctly based on the definitions.""", 
-        # messages
     )
 
     gen_chain = gen_prompt | gen_llm | check_output
@@ -42,7 +43,10 @@ def generate_patterns(state: GraphState):
     gen_chain = gen_chain_retry | parse_output
 
     print(f"---GENERATING PATTERNS llama3.1_{temperature}---")
-    patterns = gen_chain.invoke({"llm_name": f"llama3.1_{temperature}", "messages": messages})
+    patterns = gen_chain.invoke(
+        {"llm_name": f"llama3.1_{temperature}",
+        "messages": [("user", task_string)]},
+        )
 
     message = f"{patterns.model_name} Answer:\n{patterns.patterns}\n"
     return {"messages": [("assistant", message)]}
