@@ -5,5 +5,5 @@ import operator
 class GraphState(TypedDict):
     error: str
     messages: Annotated[list, operator.add]
-    # iterations: int
+    iterations: int
     generation: str
