@@ -7,15 +7,20 @@ from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 
 # TOOL
 # Data model
-class CombinePatternsTool(BaseModel):
-    patterns: str = Field(description="Enumerate the patterns used to solve the problem.")
-    test_output: str = Field(description="Output for the TEST case (applying the patterns).")
-    description = "Schema for patterns combined in the challenge's task."
+class EvaluatePatternsTool(BaseModel):
+    """
+    The evaluator should look at the patterns identified by the combinator and 
+    apply them to each example AND test case and EVALUATE the output with a score.
+    """
+    examples_with_patterns: str = Field(description="Try the patterns provided by the combinator to the challenge examples and test. Show the results")
+    evaluation: str = Field(description="Describe and evaluate each of the predictions (using the patterns) with the real examples outputs.")
+    score: int = Field(description="Evaluate the patterns and the solutions for the challenges (only one int from 0 to 10).")
+    description = "Schema for evaluating the patterns applied to the challenge."
 
 
-def agent_combine_patterns(ai_answers, temperature=0.0):
+def agent_evaluate(ai_answers, temperature=0.0):
 
-    combinator_prompt = ChatPromptTemplate.from_messages(
+    evaluator_prompt = ChatPromptTemplate.from_messages(
     [
         (
         "system",
@@ -23,33 +28,33 @@ def agent_combine_patterns(ai_answers, temperature=0.0):
         Your job is to look at the problem and compare the responses from the AIs (patterns already identified) and select the best patterns, analyze them and combine them. Also use your own knowledge about the problem.
         Hint: imagine the problem as a grid. Each number represents a different color. Imagine it visually and identify the pattern. Be very careful with the shape of the grids and identify the patterns for the inputs and outputs.
         Your GOAL is to apply the patterns and get the output for the test example. 
-        INVOKE THE "CombinePatternsTool" tool to structure the output correctly.
+        INVOKE THE "EvaluatePatternsTool" tool to structure the output correctly.
         """+"\n"+f"{ai_answers}",
         ),
         ("placeholder", "{messages}"),
     ]
     )   
     # LLM setup
-    combinator_llm = setup_llm(
+    evaluator_llm = setup_llm(
         model_name="llama3.1", 
         temperature=temperature, 
         max_tokens=1000, 
-        tools=CombinePatternsTool, 
+        tools=EvaluatePatternsTool, 
     )
     # chain setup
-    combinator_chain = setup_chain(combinator_prompt, combinator_llm, retries=3)
+    evaluator_chain = setup_chain(evaluator_prompt, evaluator_llm, retries=3)
     
-    return combinator_chain
+    return evaluator_chain
 
 
-def node_combine_patterns(state: GraphState):
-    print("---COMBINING PATTERNS AND GENERATING SOLUTION---")
+def node_evaluate_patterns(state: GraphState):
+    print("---APPLYING AND EVALUATING PATTERNS---")
 
     messages = state["messages"]
     error = state["error"]
     iterations = state["iterations"]
     
-    print(f'COMBINATOR Messages:')
+    print(f'EVALUATOR Messages:')
     task_string = messages[0][1]
     ai_answers = ""
     for message in messages[1:]:
@@ -58,21 +63,28 @@ def node_combine_patterns(state: GraphState):
 
     # We have been routed back to generation with an error
     if error == "yes":
-        messages += [("user", "Now, try again. Invoke the code tool to structure the output with the patterns and test_output:",)]
+        messages += [("user", "Now, try again. Invoke the code tool to structure the output:",)]
 
     # chain setup
-    combinator_chain = agent_combine_patterns(ai_answers)
+    evaluator_chain = agent_evaluate(ai_answers)
     
     # Invoke graph
-    final_solution = combinator_chain.invoke(
+    evaluation = evaluator_chain.invoke(
         {"llm_name": "llama3.1", 
         "messages": [("user", task_string)]},
     )
     # Increment
     iterations = iterations + 1
 
-    return {"generation": final_solution, 
-            "messages": [("assistant", final_solution)],
+    # Print evaluations
+    print(f"\n\nEXAMPLES WITH PATTERNS:")
+    print(f"{evaluation.examples_with_patterns}")
+    print(f"\nEVALUATION: \n{evaluation.evaluation}")
+    print(f"\nSCORE: {evaluation.score}")
+
+    return {"evaluation": evaluation.evaluation, 
+            "score": evaluation.score,
+            "messages": [("assistant", evaluation)],
             "error": state['error'],
             "iterations": iterations
             }

@@ -52,7 +52,7 @@ def node_generate_patterns(state: GraphState):
         print("Error in the previous step. Try again.")
 
     # chain setup
-    temperature = random.uniform(0, 3)
+    temperature = random.uniform(0, 1)
     gen_chain = agent_generate_patterns(temperature)
     
     # Invoke graph
@@ -67,6 +67,6 @@ def node_generate_patterns(state: GraphState):
 
     message = f"{patterns.model_name} Answer:\n{patterns.patterns}\n"
     return {"messages": [("assistant", message)], 
-            "error": state['error'], 
-            "iterations": iterations
+            # "error": state['error'], 
+            # "iterations": iterations
             }
