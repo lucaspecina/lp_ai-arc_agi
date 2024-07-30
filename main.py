@@ -22,7 +22,7 @@ def main(task_id, num_generators, num_iterations, debug=False):
     final_answers = []
     for i in range(num_iterations):
         print(f"\n\nITERATION {i}\n\n")
-        result = app.invoke({"messages": [("user", task_string)]}, debug=False)
+        result = app.invoke({"messages": [("user", task_string)], "iterations": 0}, debug=False)
         test_output = result['generation'].test_output
 
         if debug:

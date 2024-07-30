@@ -10,9 +10,9 @@ def check_output(tool_output):
     # print(tool_output)
     
     # TODO: remove after debug
-    random_error = random.randint(0, 1)
-    tool_output["parsed"] = None if random_error == 0 else tool_output["parsed"]
-    print(f"random_error: {random_error}")
+    # random_error = random.randint(0, 1)
+    # tool_output["parsed"] = None if random_error == 0 else tool_output["parsed"]
+    # print(f"random_error: {random_error}")
 
     if tool_output["parsing_error"]:
         print("Parsing error!")
@@ -47,8 +47,6 @@ def insert_errors(inputs):
     return {
         "llm_name": inputs["llm_name"],
         "messages": messages,
-        # "context": inputs["context"],
-        # "error": error,
     }
 
 # # Custom parser for list of strings (patterns)
