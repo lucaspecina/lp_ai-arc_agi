@@ -6,7 +6,7 @@ Trying out different ways of “thinking”, using LLMs as my intuition guide fo
 
 The code is still in the early stages but the idea is to have a simple and fast way to test different approaches and see what works. 
 
-The code is not optimized for performance, it's optimized for flexibility and ease of use.
+The code is not optimized for performance, it's optimized for flexibility and ease of use. Mostly using langchain and langgraph for multiagent architecture.
 So far it's as simple as:
 - multiple "intuition" pattern generators (parallel LLMs identifying patterns in the task)
 - combinator that takes those patterns, combine them and generate a solution for the test
@@ -15,11 +15,22 @@ So far it's as simple as:
 ## Requirements:
 - set and .env with your OPENAI_API_KEY
 - install ollama and get llama3.1
+```bash
+pip install -r requirements.txt
+```
 
 ## Usage
 ```bash
 python main.py  --num_generators 10 --num_iterations 1 --combinator_model gpt-4o --evaluator_model llama3.1 --task_id 0520fde7
 ```
+
+## Next steps and ideas
+
+- [ ] Make the prompt engineering system more robust and find more effective ways to generate and combine patterns
+    - [ ] Ensure the patterns are non-trivial
+    - [ ] Make the testing of examples (input -> output) more effective and reject patterns that do not meet the criteria
+- [ ] Create an initiator: a node that creates prompts for the generators
+- [ ] Add self-reflection (with iterations) with loops between combinators and generators (with the evaluator as the objective function)
 
 ## Contributing
 
