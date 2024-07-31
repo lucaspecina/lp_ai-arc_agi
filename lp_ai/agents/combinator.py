@@ -34,7 +34,7 @@ def agent_combine_patterns(ai_answers, model, temperature=0.0):
     combinator_llm = setup_llm(
         model_name=model,
         temperature=temperature, 
-        max_tokens=1000, 
+        max_tokens=3000, 
         tools=CombinePatternsTool, 
     )
     # chain setup

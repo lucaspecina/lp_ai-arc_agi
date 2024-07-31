@@ -12,8 +12,8 @@ class EvaluatePatternsTool(BaseModel):
     The evaluator should look at the patterns identified by the combinator and 
     apply them to each example AND test case and EVALUATE the output with a score.
     """
-    examples_with_patterns: str = Field(description="Try the patterns provided by the combinator to the challenge examples and test. Show the results")
-    evaluation: str = Field(description="Describe and evaluate each of the predictions (using the patterns) with the real examples outputs.")
+    examples_with_patterns: str = Field(description="Try the patterns provided by the combinator to the challenge examples and test if they're the same as the real example's outputs. Don't include the inputs.")
+    evaluation: str = Field(description="Describe and evaluate each of the predictions (using the patterns).")
     score: int = Field(description="Evaluate the patterns and the solutions for the challenges (only one int from 0 to 10).")
     description = "Schema for evaluating the patterns applied to the challenge."
 
@@ -25,7 +25,8 @@ def agent_evaluate(combinator_solution, model, temperature=0.0):
         [
             (
                 "system",
-                """You are a VERY SMART AI called {llm_name} who excels at evaluating patterns. Below is a list of patterns identified by the combinator, and examples with their corresponding outputs.
+                """You are a VERY SMART AI called {llm_name} who excels at evaluating patterns. We're trying to solve a puzzle that consist on a set of input and output pairs with a pattern.
+                Below is a list of patterns identified by the combinator.
                 Your task is to apply these patterns to each example and test case, evaluate the results, and score them.
                 Carefully analyze the application of each pattern and compare the predicted outputs with the actual outputs.
                 Your GOAL is to provide a detailed evaluation of the predictions and assign a score based on the accuracy of the patterns.
@@ -39,7 +40,7 @@ def agent_evaluate(combinator_solution, model, temperature=0.0):
     evaluator_llm = setup_llm(
         model_name=model,
         temperature=temperature, 
-        max_tokens=1000, 
+        max_tokens=3000, 
         tools=EvaluatePatternsTool, 
     )
     # chain setup

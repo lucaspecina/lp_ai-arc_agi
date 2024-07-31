@@ -71,10 +71,7 @@ def test_task_multiple(final_answers, challenges, solutions, task_id):
         try:
             prediction = ast.literal_eval(answer)
             print(f'Score answer {i+1}:', prediction == solutions[task_id][0])
-            if prediction == solutions[task_id][0]:
-                print('prediction:', np.array(prediction).shape)
-                print(np.array(prediction))
+            print(np.array(prediction))
         except:
             print(f"Answer {i+1}: Bad format")
             print(answer)
-    
