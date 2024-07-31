@@ -7,3 +7,4 @@ class GraphState(TypedDict):
     messages: Annotated[list, operator.add]
     iterations: int
     generation: str
+    evaluation: str

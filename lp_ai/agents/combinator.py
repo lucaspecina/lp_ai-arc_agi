@@ -10,10 +10,11 @@ from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 class CombinePatternsTool(BaseModel):
     patterns: str = Field(description="Enumerate the patterns used to solve the problem.")
     test_output: str = Field(description="Output for the TEST case (applying the patterns).")
-    description = "Schema for code solutions to questions about the challenge."
+    description = "Schema for patterns combined in the challenge's task."
 
 
-def agent_combine_patterns(ai_answers, temperature=0.0):
+def agent_combine_patterns(ai_answers, model, temperature=0.0):
+    print(f'COMBINATOR MODEL: {model}')
 
     combinator_prompt = ChatPromptTemplate.from_messages(
     [
@@ -31,9 +32,9 @@ def agent_combine_patterns(ai_answers, temperature=0.0):
     )   
     # LLM setup
     combinator_llm = setup_llm(
-        model_name="llama3.1", 
+        model_name=model,
         temperature=temperature, 
-        max_tokens=1000, 
+        max_tokens=3000, 
         tools=CombinePatternsTool, 
     )
     # chain setup
@@ -42,9 +43,10 @@ def agent_combine_patterns(ai_answers, temperature=0.0):
     return combinator_chain
 
 
-def node_combine_patterns(state: GraphState):
-    print("---COMBINING PATTERNS AND GENERATING FINAL SOLUTION---")
-
+def node_combine_patterns(state: GraphState, config):
+    print("\n\n------COMBINING PATTERNS AND GENERATING SOLUTION------")
+    combinator_model = config["configurable"]["combinator_model"]
+    
     messages = state["messages"]
     error = state["error"]
     iterations = state["iterations"]
@@ -56,17 +58,16 @@ def node_combine_patterns(state: GraphState):
         ai_answers += f"-------------------------------------------------------------\n{message[1]}"
     print(ai_answers)
 
-    # We have been routed back to generation with an error
-    if error == "yes":
-        messages += [("user", "Now, try again. Invoke the code tool to structure the output with the patterns and test_output:",)]
+    # # We have been routed back to generation with an error
+    # if error == "yes":
+    #     messages += [("user", "Now, try again. Invoke the code tool to structure the output with the patterns and test_output:",)]
 
     # chain setup
-    combinator_chain = agent_combine_patterns(ai_answers)
+    combinator_chain = agent_combine_patterns(ai_answers, combinator_model, 0.3)
     
     # Invoke graph
-    print(f"---GENERATING FINAL SOLUTION llama3.1---")
     final_solution = combinator_chain.invoke(
-        {"llm_name": "llama3.1", 
+        {"llm_name": "COMBINATOR_"+combinator_model,
         "messages": [("user", task_string)]},
     )
     # Increment
