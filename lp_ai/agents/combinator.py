@@ -2,7 +2,7 @@ from lp_ai.agents.base import setup_llm, setup_prompt, setup_chain
 from lp_ai.output.parsing import check_output, parse_output, insert_errors
 from lp_ai.graph.state import GraphState
 from langchain_core.pydantic_v1 import BaseModel, Field
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 
 
 # TOOL
@@ -44,7 +44,7 @@ def agent_combine_patterns(ai_answers, model, temperature=0.0):
 
 
 def node_combine_patterns(state: GraphState, config):
-    print("\n\n------COMBINING PATTERNS AND GENERATING SOLUTION------")
+    print("\n\n\n------COMBINING PATTERNS AND GENERATING SOLUTION------")
     combinator_model = config["configurable"]["combinator_model"]
     
     messages = state["messages"]
@@ -54,8 +54,8 @@ def node_combine_patterns(state: GraphState, config):
     print(f'COMBINATOR Messages:')
     task_string = messages[0][1]
     ai_answers = ""
-    for message in messages[1:]:
-        ai_answers += f"-------------------------------------------------------------\n{message[1]}"
+    for message in messages[1:]: # for message in messages[2:]:
+        ai_answers += f"\n-------------------------------------------------------------\n{message[1]}"
     print(ai_answers)
 
     # # We have been routed back to generation with an error
