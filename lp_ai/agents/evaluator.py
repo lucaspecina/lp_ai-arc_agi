@@ -18,25 +18,26 @@ class EvaluatePatternsTool(BaseModel):
     description = "Schema for evaluating the patterns applied to the challenge."
 
 
-def agent_evaluate(ai_answers, temperature=0.0):
+def agent_evaluate(combinator_solution, model, temperature=0.0):
+    print(f'EVALUATOR MODEL: {model}')
 
     evaluator_prompt = ChatPromptTemplate.from_messages(
-    [
-        (
-        "system",
-        """You are a VERY SMART AI called {llm_name} who is very good at solving puzzles. Below is a list of input and output pairs with a pattern.
-        Your job is to look at the problem and compare the responses from the AIs (patterns already identified) and select the best patterns, analyze them and combine them. Also use your own knowledge about the problem.
-        Hint: imagine the problem as a grid. Each number represents a different color. Imagine it visually and identify the pattern. Be very careful with the shape of the grids and identify the patterns for the inputs and outputs.
-        Your GOAL is to apply the patterns and get the output for the test example. 
-        INVOKE THE "EvaluatePatternsTool" tool to structure the output correctly.
-        """+"\n"+f"{ai_answers}",
-        ),
-        ("placeholder", "{messages}"),
-    ]
-    )   
+        [
+            (
+                "system",
+                """You are a VERY SMART AI called {llm_name} who excels at evaluating patterns. Below is a list of patterns identified by the combinator, and examples with their corresponding outputs.
+                Your task is to apply these patterns to each example and test case, evaluate the results, and score them.
+                Carefully analyze the application of each pattern and compare the predicted outputs with the actual outputs.
+                Your GOAL is to provide a detailed evaluation of the predictions and assign a score based on the accuracy of the patterns.
+                INVOKE THE "EvaluatePatternsTool" tool to structure the output correctly.
+                """+"\n"+f"{combinator_solution}",
+            ),
+            ("placeholder", "{messages}"),
+        ]
+    )
     # LLM setup
     evaluator_llm = setup_llm(
-        model_name="llama3.1", 
+        model_name=model,
         temperature=temperature, 
         max_tokens=1000, 
         tools=EvaluatePatternsTool, 
@@ -47,8 +48,9 @@ def agent_evaluate(ai_answers, temperature=0.0):
     return evaluator_chain
 
 
-def node_evaluate_patterns(state: GraphState):
-    print("---APPLYING AND EVALUATING PATTERNS---")
+def node_evaluate_patterns(state: GraphState, config):
+    print("\n\n------EVALUATING AND APPLYING PATTERNS------")
+    evaluator_model = config["configurable"]["evaluator_model"]
 
     messages = state["messages"]
     error = state["error"]
@@ -56,21 +58,20 @@ def node_evaluate_patterns(state: GraphState):
     
     print(f'EVALUATOR Messages:')
     task_string = messages[0][1]
-    ai_answers = ""
-    for message in messages[1:]:
-        ai_answers += f"-------------------------------------------------------------\n{message[1]}"
-    print(ai_answers)
+    combinator_solution = "-------------------------------------------------------------\n"
+    combinator_solution += f"Combinator solution: \nPatterns:\n{messages[-1][1].patterns}\nTest output:\n{messages[-1][1].test_output}"
+    print(combinator_solution)
 
-    # We have been routed back to generation with an error
-    if error == "yes":
-        messages += [("user", "Now, try again. Invoke the code tool to structure the output:",)]
+    # # We have been routed back to generation with an error
+    # if error == "yes":
+    #     messages += [("user", "Now, try again. Invoke the code tool to structure the output:",)]
 
     # chain setup
-    evaluator_chain = agent_evaluate(ai_answers)
+    evaluator_chain = agent_evaluate(combinator_solution, evaluator_model, 0.3)
     
     # Invoke graph
     evaluation = evaluator_chain.invoke(
-        {"llm_name": "llama3.1", 
+        {"llm_name": "EVALUATOR"+evaluator_model,
         "messages": [("user", task_string)]},
     )
     # Increment

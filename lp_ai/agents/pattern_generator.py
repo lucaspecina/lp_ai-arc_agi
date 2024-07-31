@@ -52,11 +52,11 @@ def node_generate_patterns(state: GraphState):
         print("Error in the previous step. Try again.")
 
     # chain setup
-    temperature = random.uniform(0, 1)
+    temperature = random.uniform(0, 0.3)
     gen_chain = agent_generate_patterns(temperature)
     
     # Invoke graph
-    print(f"---GENERATING PATTERNS llama3.1_{temperature}---")
+    print(f"------GENERATING PATTERNS llama3.1_{temperature}------")
     patterns = gen_chain.invoke(
         {"llm_name": f"llama3.1_{temperature}",
         # "messages": current_messages},

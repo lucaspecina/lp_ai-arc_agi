@@ -8,7 +8,7 @@ from lp_ai.output.scoring import test_task_multiple
 import argparse
 
 
-def main(task_id, num_generators, num_iterations, debug=False):
+def main(task_id, num_generators, num_iterations, combinator_model, evaluator_model, debug=False):
     
     # Load task
     challenges, solutions = load_tasks_from_file(task_sets['training'])
@@ -22,7 +22,11 @@ def main(task_id, num_generators, num_iterations, debug=False):
     final_answers = []
     for i in range(num_iterations):
         print(f"\n\nITERATION {i}\n\n")
-        result = app.invoke({"messages": [("user", task_string)], "iterations": 0}, debug=False)
+        result = app.invoke(
+            {"messages": [("user", task_string)], "iterations": 0,}, 
+            {"configurable": {"combinator_model": combinator_model, "evaluator_model": evaluator_model}},
+            debug=False,
+            )
         test_output = result['generation'].test_output
 
         if debug:
@@ -43,7 +47,9 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--debug", action="store_true", help="Enable verbose output for debugging", default=False)
     parser.add_argument("-t", "--task_id", type=str, help="Task ID", default="0520fde7")
     parser.add_argument("-n", "--num_generators", type=int, help="Number of generators", default=3)
-    parser.add_argument("-i", "--num_iterations", type=int, help="Number of generators", default=1)
+    parser.add_argument("-i", "--num_iterations", type=int, help="Number of iterations", default=1)
+    parser.add_argument("-c", "--combinator_model", type=str, help="Combinator Model", default="llama3.1")
+    parser.add_argument("-e", "--evaluator_model", type=str, help="Evaluator Model", default="llama3.1")
     args = parser.parse_args()
 
     print(f"Task ID: {args.task_id}")
@@ -51,4 +57,9 @@ if __name__ == "__main__":
     print(f"Debug: {args.debug}")
     print(f"Number of iterations: {args.num_iterations}")
 
-    main(args.task_id, args.num_generators, args.num_iterations, args.debug)
+    main(args.task_id, args.num_generators, args.num_iterations, args.combinator_model, args.evaluator_model, args.debug)
+
+"""
+run example
+python main.py  --num_generators 10 --num_iterations 1 --combinator_model gpt-4o --evaluator_model gpt-4o --task_id 0520fde7
+"""
