@@ -4,6 +4,7 @@ from lp_ai.graph.state import GraphState
 from lp_ai.agents.pattern_generator import node_generate_patterns
 from lp_ai.agents.combinator import node_combine_patterns
 from lp_ai.agents.evaluator import node_evaluate_patterns
+from lp_ai.agents.initiator import node_initiate
 
 max_iterations = 3
 
@@ -41,14 +42,16 @@ def setup_workflow(num_generators=3):
     workflow = StateGraph(GraphState)
 
     # Define the nodes
+    workflow.add_node("initiator", node_initiate)
     for i in range(num_generators):
         workflow.add_node(f"generator_{i}", node_generate_patterns)
     workflow.add_node("combinator", node_combine_patterns)
     workflow.add_node("evaluator", node_evaluate_patterns)
 
     # Build graph
+    workflow.add_edge(START, "initiator")
     for i in range(num_generators):
-        workflow.add_edge(START, f"generator_{i}")
+        workflow.add_edge("initiator", f"generator_{i}")
         workflow.add_edge(f"generator_{i}", "combinator")
     workflow.add_edge("combinator", "evaluator")
     workflow.add_conditional_edges(

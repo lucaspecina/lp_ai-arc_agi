@@ -8,12 +8,13 @@ The code is still in the early stages but the idea is to have a simple and fast 
 
 The code is not optimized for performance, it's optimized for flexibility and ease of use. Mostly using langchain and langgraph for multiagent architecture.
 So far it's as simple as:
-- multiple "intuition" pattern generators (parallel LLMs identifying patterns in the task)
-- combinator that takes those patterns, combine them and generate a solution for the test
-- evaluator that checks if the solution is correct, scores the output and gives feedback to the generators 
+- **initiator model**: looks at the problem and creates the prompt for the pattern generators nodes
+- **pattern generators ("intuition")**: multiple LLMs running in parallel, identifying patterns and rules in the task
+- **pattern combinator**: takes those patterns, combine them and generate a solution for the test
+- **evaluator**: checks if the solution is correct, scores the output and gives feedback to the generators 
 
 ## Requirements:
-- set and .env with your OPENAI_API_KEY
+- set up an .env file with your OPENAI_API_KEY
 - install ollama and get llama3.1
 ```bash
 pip install -r requirements.txt
@@ -21,7 +22,7 @@ pip install -r requirements.txt
 
 ## Usage
 ```bash
-python main.py  --num_generators 10 --num_iterations 1 --combinator_model gpt-4o --evaluator_model llama3.1 --task_id 0520fde7
+python main.py  --num_generators 10 --num_iterations 5 --initiator_model gpt-4o --combinator_model gpt-4o --evaluator_model gpt-4o --task_id 0520fde7
 ```
 
 ## Next steps and ideas
@@ -29,8 +30,9 @@ python main.py  --num_generators 10 --num_iterations 1 --combinator_model gpt-4o
 - [ ] Make the prompt engineering system more robust and find more effective ways to generate and combine patterns
     - [ ] Ensure the patterns are non-trivial
     - [ ] Make the testing of examples (input -> output) more effective and reject patterns that do not meet the criteria
-- [ ] Create an initiator: a node that creates prompts for the generators
 - [ ] Add self-reflection (with iterations) with loops between combinators and generators (with the evaluator as the objective function)
+
+Check out the project https://github.com/users/lucaspecina/projects/1/views/1 for new developments and bug fixes.
 
 ## Contributing
 
