@@ -2,6 +2,4 @@
 .env
 .gitattributes
 .DS_Store
-submissions/
-dev.ipynb
 *.pyc
