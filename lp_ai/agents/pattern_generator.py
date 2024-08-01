@@ -41,22 +41,17 @@ def agent_generate_patterns(init_prompt, temperature=0.0):
     
     return gen_chain
 
-# gen_chain = agent_generate_patterns(0.3)
 
 def node_generate_patterns(state: GraphState):
     messages = state["messages"]
     error = state["error"]
-    iterations = state["iterations"]
-    current_messages = []
 
     task_string = messages[0][1]
     init_prompt = messages[-1][1]
-    current_messages += [("user", task_string)]
 
     # We have been routed back to generation with an error
     if error == "yes":
         messages += [("user", "Now, try again. Invoke the code tool to structure the output:",)]
-        current_messages += [("user", "Now, try again. Invoke the code tool to structure the output:",)]
         print("Error in the previous step. Try again.")
 
     # chain setup
@@ -67,14 +62,8 @@ def node_generate_patterns(state: GraphState):
     print(f"------GENERATING PATTERNS llama3.1_{temperature}------")
     patterns = gen_chain.invoke(
         {"llm_name": f"llama3.1_{temperature}",
-        # "messages": current_messages},
-        "messages": messages},
+        "messages": [("user", task_string)]},
         )
-    # Increment
-    # iterations = iterations + 1
 
     message = f"{patterns.model_name} Answer:\n{patterns.patterns}\n"
-    return {"messages": [("assistant", message)], 
-            # "error": state['error'], 
-            # "iterations": iterations
-            }
+    return {"messages": [("assistant", message)], }

@@ -35,7 +35,8 @@ def evaluation_good_enough(state: GraphState):
     iterations = state["iterations"]
     if ((error == "no" or error is None) and score > 8) or iterations == max_iterations:
         print(f"\n\n---DECISION: FINISH (Score {score} Good enough)---")
-        return "end"
+        # return "end" # for testing
+        return "initiator"
     else:
         print(f"\n\n---DECISION: RETHINK (Score {score} NOT Good enough)---")
         return "initiator"
