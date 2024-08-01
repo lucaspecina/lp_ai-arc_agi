@@ -31,7 +31,7 @@ def json_task_to_string(challenge_tasks, task_id, test_input_index):
         final_output += f"Example {i + 1}: Input\n["
         for row in task['input']:
             final_output += f"\n{str(row)},"
-        final_output += "]\n\nExample {i + 1}: Output\n["
+        final_output += f"]\n\nExample {i + 1}: Output\n["
         for row in task['output']:
             final_output += f"\n{str(row)},"
         final_output += "]\n\n"

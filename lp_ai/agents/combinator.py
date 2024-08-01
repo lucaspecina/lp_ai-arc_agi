@@ -8,7 +8,7 @@ from langchain_core.prompts import ChatPromptTemplate
 # TOOL
 # Data model
 class CombinePatternsTool(BaseModel):
-    patterns: str = Field(description="Enumerate the patterns used to solve the problem.")
+    patterns: str = Field(description="Enumerate the patterns/rules combined and used to solve the problem.")
     test_output: str = Field(description="Output for the TEST case (applying the patterns).")
     description = "Schema for patterns combined in the challenge's task."
 
@@ -21,9 +21,9 @@ def agent_combine_patterns(ai_answers, model, temperature=0.0):
         (
         "system",
         """You are a VERY SMART AI called {llm_name} who is very good at solving puzzles. Below is a list of input and output pairs with a pattern.
-        Your job is to look at the problem and compare the responses from the AIs (patterns already identified) and select the best patterns, analyze them and combine them. Also use your own knowledge about the problem.
-        Hint: imagine the problem as a grid. Each number represents a different color. Imagine it visually and identify the pattern. Be very careful with the shape of the grids and identify the patterns for the inputs and outputs.
-        Your GOAL is to apply the patterns and get the output for the test example. 
+        Your job is to look at the problem and compare the responses from the AIs (patterns/rules already identified) and select the best patterns/rules, analyze them and combine them. Also use your own knowledge about the problem.
+        Hint: imagine the problem as a grid. Each number represents a different color. Imagine it visually and identify the pattern. Be very careful with the shape of the grids and identify the patterns/rules for the inputs and outputs.
+        Your GOAL is to apply the patterns/rules and get the output for the test example. 
         INVOKE THE "CombinePatternsTool" tool to structure the output correctly.
         """+"\n"+f"{ai_answers}",
         ),
@@ -38,21 +38,25 @@ def agent_combine_patterns(ai_answers, model, temperature=0.0):
         tools=CombinePatternsTool, 
     )
     # chain setup
-    combinator_chain = setup_chain(combinator_prompt, combinator_llm, retries=3)
+    combinator_chain = setup_chain(combinator_prompt, combinator_llm)
     
     return combinator_chain
 
 
 def node_combine_patterns(state: GraphState, config):
-    print("\n\n\n------COMBINING PATTERNS AND GENERATING SOLUTION------")
     combinator_model = config["configurable"]["combinator_model"]
+
+    task_string = state["task_string"] # messages[0][1]
+    n_generators = state["n_generators"]
     messages = state["messages"]
     error = state['error']
+    iterations = state["iterations"]
+    max_reflections = state["max_reflections"]
+    print(f"\n\n\n------[{iterations+1}/{max_reflections} reflections] COMBINING PATTERNS AND GENERATING SOLUTION------")
     
     print(f'COMBINATOR Messages:')
-    task_string = messages[0][1]
     ai_answers = ""
-    for message in messages[2:]:
+    for message in messages[-n_generators:]: # take the last n_generators messages
         ai_answers += f"\n-------------------------------------------------------------\n{message[1]}"
     print(ai_answers)
 
@@ -60,11 +64,12 @@ def node_combine_patterns(state: GraphState, config):
     combinator_chain = agent_combine_patterns(ai_answers, combinator_model, 0.3)
     
     # Invoke graph
-    final_solution = combinator_chain.invoke(
+    patterns_combined = combinator_chain.invoke(
         {"llm_name": "COMBINATOR_"+combinator_model,
         "messages": [("user", task_string)]},
     )
-    return {"generation": final_solution, 
-            "messages": [("assistant", final_solution)],
+    return {"test_output": patterns_combined.test_output, 
+            "messages": [("assistant", patterns_combined)],
             "error": error,
+            "rules": patterns_combined.patterns,
             }

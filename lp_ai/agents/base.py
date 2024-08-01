@@ -24,7 +24,7 @@ def setup_llm(model_name, temperature=0, max_tokens=1000, tools=None):
     else:
         raise ValueError(f"Unknown model name: {model_name}")
 
-def setup_chain(prompt, llm, retries=3):
+def setup_chain(prompt, llm, retries=5):
     gen_chain_raw = prompt | llm | check_output
     
     # This will be run as a fallback chain
