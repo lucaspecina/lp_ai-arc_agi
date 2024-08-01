@@ -13,6 +13,9 @@ So far it's as simple as:
 - **pattern combinator**: takes those patterns, combine them and generate a solution for the test
 - **evaluator**: checks if the solution is correct, scores the output and gives feedback to the generators 
 
+ 
+![Workflow Graph](workflow_graph.png)
+
 ## Requirements:
 - set up an .env file with your OPENAI_API_KEY
 - install ollama and get llama3.1
