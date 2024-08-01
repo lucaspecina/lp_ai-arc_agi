@@ -12,7 +12,7 @@ class PromptingTool(BaseModel):
     description = "Schema for providing the prompt to the generators."
 
 
-def agent_initiation(model, feedback=None, history_prompt=None, temperature=0.0):
+def agent_initiation(model, feedback=None, rules=None, temperature=0.0):
     print(f'INITIATOR MODEL: {model}')
 
     base_init_prompt = """You're a VERY SMART AI which is the BRAIN of a clever multi-LLM agent system built to solve puzzles.
@@ -26,21 +26,22 @@ def agent_initiation(model, feedback=None, history_prompt=None, temperature=0.0)
         You need to UNDERSTAND the problem and create the most effective prompt to guide the pattern generators to solve the ARC-AGI tasks.
         Use the "PromptingTool" tool to structure the output correctly based on the description.
         Explain the problem extensively and give context but don't include the inputs or outputs in the prompt, just the instructions to the AIs (the task will be provided to them).
-        Tell them that they should produce some non-trivial patterns that can be used to solve the task and list them."""
+        Tell them that they should produce 5 non-trivial patterns that can be used to solve the task and list them. They don't need to generate the outputs, only LIST THE RULES."""
     
     if feedback is not None:
         base_init_prompt += f"""\n--------------------------------------------------
         REFLECTION: 
-        There has been already previous attempts to solve the task but the evaluator found that the patterns generated were not accurate enough.
-
+        There has been already previous attempts to solve the task but the evaluator found that the patterns/rules generated were not accurate enough.
         --------------------------------------------------
-        HISTORY OF MESSAGES (for reflection):
+        LIST OF PATTERNS/RULES PREVIOUSLY USED WITHOUT SUCCESS (for reflection):
+        {rules}
+        --------------------------------------------------
+        RULES APPLIED TO TRAIN TASKS AND FEEDBACK FROM THE EVLUATOR:
+        {feedback}
+        
+        --------------------------------------------------
+        Now, it's your turn for the next iteration. Use the feedback to improve the prompt and guide the AIs to generate 5 better patterns/rules.
         """
-        # if history_prompt:
-        #     base_init_prompt += history_prompt
-        base_init_prompt += feedback # TODO: remove after testing
-        base_init_prompt += """Now, it's your turn for the next iteration. Use the feedback to improve the prompt and guide the AIs to generate better patterns."""
-
 
     init_prompt = ChatPromptTemplate.from_messages(
     [
@@ -62,40 +63,35 @@ def agent_initiation(model, feedback=None, history_prompt=None, temperature=0.0)
         tools=PromptingTool, 
     )
     # chain setup
-    init_chain = setup_chain(init_prompt, init_llm, retries=3)
+    init_chain = setup_chain(init_prompt, init_llm)
     
     return init_chain
 
 
 def node_initiate(state: GraphState, config):
-    print("\n\n------INITIATING SYSTEM AND GENERATING PROMPTS------")
     init_model = config["configurable"]["initiator_model"]
 
+    task_string = state["task_string"] # messages[0][1]
     messages = state["messages"]
     error = state["error"]
     feedback = state["feedback"]
-
-    task_string = messages[0][1]
+    rules = state["rules"]
+    iterations = state["iterations"]
+    max_reflections = state["max_reflections"]
+    print(f"\n\n------[{iterations+1}/{max_reflections} reflections] INITIATING SYSTEM AND GENERATING PROMPTS------")
 
     # We have been routed back to generation with an error
     if error == "yes":
         messages += [("user", "Now, try again. Invoke the code tool to structure the output:",)]
         print("Error in the previous step. Try again.")
-    if feedback is not None:
-        # langchain.debug = True if feedback is not None else False
-        history_prompt = ""
-        for message in messages[1:]:
-            history_prompt += f"""\n--------------------------------------------------
-            {message}"""
-    else:
-        history_prompt = None
-
+    
+    # langchain.debug = True if feedback is not None else False
 
     # chain setup
     init_chain = agent_initiation(
                                 init_model, 
                                 feedback=feedback,
-                                history_prompt=history_prompt,
+                                rules=rules,
                                 temperature=0.3
                                 )
     
@@ -103,6 +99,10 @@ def node_initiate(state: GraphState, config):
     init_prompt = init_chain.invoke({"messages": [("user", task_string)]})    
     # langchain.debug = False
 
-    message = f"Initial prompt: \n{init_prompt.gen_prompt}"
-    print(f"INITIATOR PROMPT: {message}\n\n")
-    return {"messages": [("user", message)], }
+    gen_prompt = f"Initial prompt: \n{init_prompt.gen_prompt}"
+    print(f"INITIATOR PROMPT: {gen_prompt}\n\n")
+    
+    return {
+        "messages": [("user", gen_prompt)], 
+        "gen_prompt": gen_prompt,
+        }

@@ -37,17 +37,19 @@ def agent_generate_patterns(init_prompt, temperature=0.0):
         tools=PatternsExtractionTool, 
     )
     # chain setup
-    gen_chain = setup_chain(gen_prompt, gen_llm, retries=3)
+    gen_chain = setup_chain(gen_prompt, gen_llm)
     
     return gen_chain
 
 
 def node_generate_patterns(state: GraphState):
+    
+    task_string = state["task_string"] # messages[0][1]
     messages = state["messages"]
     error = state["error"]
-
-    task_string = messages[0][1]
-    init_prompt = messages[-1][1]
+    init_prompt = state["gen_prompt"] # init_prompt = messages[-1][1]
+    iterations = state["iterations"]
+    max_reflections = state["max_reflections"]
 
     # We have been routed back to generation with an error
     if error == "yes":
@@ -55,11 +57,11 @@ def node_generate_patterns(state: GraphState):
         print("Error in the previous step. Try again.")
 
     # chain setup
-    temperature = random.uniform(0, 0.3)
+    temperature = random.uniform(0, 0.5)
     gen_chain = agent_generate_patterns(init_prompt, temperature)
     
     # Invoke graph
-    print(f"------GENERATING PATTERNS llama3.1_{temperature}------")
+    print(f"------[{iterations+1}/{max_reflections} reflections] GENERATING PATTERNS llama3.1_{temperature}------")
     patterns = gen_chain.invoke(
         {"llm_name": f"llama3.1_{temperature}",
         "messages": [("user", task_string)]},

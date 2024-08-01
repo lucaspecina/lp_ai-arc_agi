@@ -8,7 +8,6 @@ from lp_ai.agents.initiator import node_initiate
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
-max_iterations = 3
 
 def decide_to_finish(state: GraphState):
     error = state["error"]
@@ -23,7 +22,8 @@ def retry_generator(state: GraphState):
     # print(f"RETRY_GENERATOR: {state}")
     error = state["error"]
     iterations = state["iterations"]
-    if (error == "no" or error is None) or iterations == max_iterations:
+    max_reflections = state["max_reflections"]
+    if (error == "no" or error is None) or iterations == max_reflections:
         return "combinator"
     else:
         print("---DECISION: RE-TRY SOLUTION---")
@@ -33,10 +33,10 @@ def evaluation_good_enough(state: GraphState):
     error = state["error"]
     score = state["score"]
     iterations = state["iterations"]
-    if ((error == "no" or error is None) and score > 8) or iterations == max_iterations:
+    max_reflections = state["max_reflections"]
+    if ((error == "no" or error is None) and score > 8) or iterations == max_reflections:
         print(f"\n\n---DECISION: FINISH (Score {score} Good enough)---")
-        # return "end" # for testing
-        return "initiator"
+        return "end"
     else:
         print(f"\n\n---DECISION: RETHINK (Score {score} NOT Good enough)---")
         return "initiator"
@@ -68,9 +68,9 @@ def setup_workflow(num_generators=3):
     app = workflow.compile()
 
     # Save the graph image to a file
-    graph_image_path = "workflow_graph.png"
-    graph_image = app.get_graph().draw_mermaid_png()
-    with open(graph_image_path, "wb") as f:
-        f.write(graph_image)
+    # graph_image_path = "workflow_graph.png"
+    # graph_image = app.get_graph().draw_mermaid_png()
+    # with open(graph_image_path, "wb") as f:
+    #     f.write(graph_image)
     
     return app
