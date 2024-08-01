@@ -5,6 +5,8 @@ from lp_ai.agents.pattern_generator import node_generate_patterns
 from lp_ai.agents.combinator import node_combine_patterns
 from lp_ai.agents.evaluator import node_evaluate_patterns
 from lp_ai.agents.initiator import node_initiate
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 
 max_iterations = 3
 
@@ -31,12 +33,13 @@ def evaluation_good_enough(state: GraphState):
     error = state["error"]
     score = state["score"]
     iterations = state["iterations"]
-    if ((error == "no" or error is None) and score >= 7) or iterations == max_iterations:
+    if ((error == "no" or error is None) and score > 8) or iterations == max_iterations:
         print(f"\n\n---DECISION: FINISH (Score {score} Good enough)---")
-        return "end"
+        # return "end" # for testing
+        return "initiator"
     else:
         print(f"\n\n---DECISION: RETHINK (Score {score} NOT Good enough)---")
-        return "combinator"
+        return "initiator"
 
 def setup_workflow(num_generators=3):
     workflow = StateGraph(GraphState)
@@ -59,8 +62,15 @@ def setup_workflow(num_generators=3):
         evaluation_good_enough,
         {
             "end": END,
-            "combinator": "combinator",
+            "initiator": "initiator",
         },
     )
     app = workflow.compile()
+
+    # Save the graph image to a file
+    graph_image_path = "workflow_graph.png"
+    graph_image = app.get_graph().draw_mermaid_png()
+    with open(graph_image_path, "wb") as f:
+        f.write(graph_image)
+    
     return app

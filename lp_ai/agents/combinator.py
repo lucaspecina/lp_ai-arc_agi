@@ -34,7 +34,7 @@ def agent_combine_patterns(ai_answers, model, temperature=0.0):
     combinator_llm = setup_llm(
         model_name=model,
         temperature=temperature, 
-        max_tokens=3000, 
+        max_tokens=1000, 
         tools=CombinePatternsTool, 
     )
     # chain setup
@@ -46,21 +46,15 @@ def agent_combine_patterns(ai_answers, model, temperature=0.0):
 def node_combine_patterns(state: GraphState, config):
     print("\n\n\n------COMBINING PATTERNS AND GENERATING SOLUTION------")
     combinator_model = config["configurable"]["combinator_model"]
-    
     messages = state["messages"]
-    error = state["error"]
-    iterations = state["iterations"]
+    error = state['error']
     
     print(f'COMBINATOR Messages:')
     task_string = messages[0][1]
     ai_answers = ""
-    for message in messages[1:]: # for message in messages[2:]:
+    for message in messages[2:]:
         ai_answers += f"\n-------------------------------------------------------------\n{message[1]}"
     print(ai_answers)
-
-    # # We have been routed back to generation with an error
-    # if error == "yes":
-    #     messages += [("user", "Now, try again. Invoke the code tool to structure the output with the patterns and test_output:",)]
 
     # chain setup
     combinator_chain = agent_combine_patterns(ai_answers, combinator_model, 0.3)
@@ -70,11 +64,7 @@ def node_combine_patterns(state: GraphState, config):
         {"llm_name": "COMBINATOR_"+combinator_model,
         "messages": [("user", task_string)]},
     )
-    # Increment
-    iterations = iterations + 1
-
     return {"generation": final_solution, 
             "messages": [("assistant", final_solution)],
-            "error": state['error'],
-            "iterations": iterations
+            "error": error,
             }

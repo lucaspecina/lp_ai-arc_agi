@@ -6,17 +6,14 @@ from langchain_openai import ChatOpenAI
 import os 
 from lp_ai.output.parsing import check_output, parse_output, insert_errors
 
-# Base agent class or functions can be defined here
-# E.g., LLM setup, common utilities, etc.
-
 # Example of a base LLM setup
 def setup_llm(model_name, temperature=0, max_tokens=1000, tools=None):
-    if model_name == 'llama3.1':
+    if model_name.startswith('llama3'):
         llm = ChatOllama(model=model_name, temperature=temperature, max_tokens=max_tokens)
         llm = llm.with_structured_output(tools, include_raw=True)
         return llm
     
-    elif model_name == 'gpt-4o':
+    elif model_name.startswith("gpt"):
         openai_api_key = os.getenv('OPENAI_API_KEY')
         if not openai_api_key:
             raise ValueError("OpenAI API key is not defined.")
