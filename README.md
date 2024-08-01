@@ -33,7 +33,7 @@ python main.py  --num_generators 10 --num_iterations 5 --initiator_model gpt-4o 
 - [ ] Make the prompt engineering system more robust and find more effective ways to generate and combine patterns
     - [ ] Ensure the patterns are non-trivial
     - [ ] Make the testing of examples (input -> output) more effective and reject patterns that do not meet the criteria
-- [ ] Add self-reflection (with iterations) with loops between combinators and generators (with the evaluator as the objective function)
+- [ ] Allow the model to (optionally) create code and execute it to test the solutions (instead of outputting the answer directly)
 
 Check out the project https://github.com/users/lucaspecina/projects/1/views/1 for new developments and bug fixes.
 
