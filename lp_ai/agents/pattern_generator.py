@@ -10,7 +10,7 @@ from typing import List
 class PatternsExtractionTool(BaseModel):
     model_name: str = Field(description="Name of the model that generated the patterns.")
     patterns: str = Field(description="Patterns found in ALL the examples in the task (non-trivial rules that apply from input to output in all examples).")
-    description = "Schema for patterns identified in the challenge's task."
+    description = "Schema for patterns identified in the challenge's task. Don't use brackets {} in the responses."
 
 # TODO: create classes for the agents (base and specific)
 def agent_generate_patterns(init_prompt, temperature=0.0):
@@ -23,7 +23,8 @@ def agent_generate_patterns(init_prompt, temperature=0.0):
         {init_prompt}
         
         Use the "PatternsExtractionTool" tool to structure the output correctly based on the description.
-
+        The transformation rules should be such that if applied to the training input examples, they should produce the training output examples.
+        
         Below is the task:""",
         ),
         ("placeholder", "{messages}"),

@@ -5,6 +5,7 @@ from lp_ai.agents.pattern_generator import node_generate_patterns
 from lp_ai.agents.combinator import node_combine_patterns
 from lp_ai.agents.evaluator import node_evaluate_patterns
 from lp_ai.agents.initiator import node_initiate
+from lp_ai.output.scoring import test_training_examples
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
@@ -34,8 +35,31 @@ def evaluation_good_enough(state: GraphState):
     score = state["score"]
     iterations = state["iterations"]
     max_reflections = state["max_reflections"]
+    task_id = state["task_id"]
+    training_predictions = state["training_predictions"]
+
+    # TODO: Test the training examples with the rules applied
+    training_examples_fail = False
+    training_examples_eval = test_training_examples(training_predictions, task_id)
+    print("\n\n---EVALUATION OF TRAIN EXAMPLES WITH RULES APPLIED (deterministic)---")
+    for example in training_examples_eval:
+        print(f"\nExample {example['example']}:")
+        if example["score"]:
+            print("SUCCESS")
+        else:
+            print("FAILURE")
+            print(f"input: {example['input']}")
+            print(f"Real output:")
+            print(example['output'])
+            print(f"Prediction:")
+            print(example['prediction'])
+            training_examples_fail = True
+
     if ((error == "no" or error is None) and score > 8) or iterations == max_reflections:
         print(f"\n\n---DECISION: FINISH (Score {score} Good enough)---")
+        if training_examples_fail is True:
+            print(f"But the training examples test (deterministic) failed. DECISION: RETHINK")
+            return "initiator"
         return "end"
     else:
         print(f"\n\n---DECISION: RETHINK (Score {score} NOT Good enough)---")

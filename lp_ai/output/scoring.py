@@ -1,8 +1,35 @@
 import numpy as np 
 from collections import Counter
 import ast
+from lp_ai.data.data_processing import load_tasks_from_file, task_sets
 
-def test_task(gen_code, challenges, solutions, task_id):
+
+def test_training_examples(training_predictions, task_id):
+    """Compares the training_predictions with the real training outputs for a task."""
+    challenges, solutions = load_tasks_from_file(task_sets['training'])
+
+    assert len(training_predictions) == len(challenges[task_id]['train']), "Number of training examples and predictions do not match"
+    
+    training_examples = []
+    for i, train_task in enumerate(challenges[task_id]['train']):
+        try:
+            training_examples.append({
+                "example": i+1, 
+                "input": train_task['input'], 
+                "output": train_task['output'], 
+                "prediction": ast.literal_eval(training_predictions[i]), 
+                "score": ast.literal_eval(training_predictions[i]) == train_task['output']})
+        except:
+            training_examples.append({
+                "example": i+1, 
+                "input": train_task['input'], 
+                "output": train_task['output'], 
+                "prediction": "Bad format", 
+                "score": False})
+    return training_examples
+
+
+def test_individual_task(gen_code, challenges, solutions, task_id):
     code_namespace = {}
     
     # Execute the code to define the function in the local namespace
@@ -11,7 +38,6 @@ def test_task(gen_code, challenges, solutions, task_id):
     # Extract the function from the local namespace
     solve = code_namespace['solve']
     print(solve)
-    
     
     print('TRAIN EXAMPLES:')
     for i, train_task in enumerate(challenges[task_id]['train']):

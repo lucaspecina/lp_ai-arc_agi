@@ -25,7 +25,7 @@ pip install -r requirements.txt
 
 ## Usage
 ```bash
-python main.py  --num_generators 3 --max_reflections 3 --rounds 2 --initiator_model gpt-4o --combinator_model gpt-4o --evaluator_model gpt-4o --task_id 0520fde7
+python main.py --num_generators 3 --max_reflections 3 --rounds 2 --initiator_model gpt-4o --combinator_model gpt-4o --evaluator_model gpt-4o --task_id 0520fde7
 ```
 
 ## Next steps and ideas
