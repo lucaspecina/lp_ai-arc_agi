@@ -1,6 +1,4 @@
 import os
-import sys
-import numpy as np
 from lp_ai.data.data_processing import load_tasks_from_file, task_sets
 from lp_ai.graph.workflow import setup_workflow
 from lp_ai.data.data_processing import json_task_to_string
@@ -23,7 +21,8 @@ def main(task_id, num_generators, max_reflections, rounds, initiator_model, comb
     for i in range(rounds):
         print(f"\n\nROUND {i+1}/{rounds}"+"-"*40+"\n")
         output = app.invoke(
-            {"messages": [("user", task_string)], 
+            {"messages": [("user", task_string)],
+             "task_id": task_id,
              "iterations": 0, 
              "n_generators": num_generators,
              "task_string": task_string,
@@ -78,8 +77,3 @@ if __name__ == "__main__":
         args.evaluator_model, 
         args.debug
         )
-
-"""
-run example
-python main.py  --num_generators 3 --max_reflections 3 --rounds 2 --initiator_model gpt-4o --combinator_model gpt-4o --evaluator_model gpt-4o --task_id 0520fde7
-"""

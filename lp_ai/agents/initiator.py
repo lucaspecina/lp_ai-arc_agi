@@ -9,7 +9,7 @@ import langchain
 # Output data model
 class PromptingTool(BaseModel):
     gen_prompt: str = Field(description="Prompt for the pattern generators (with or without reflection).")
-    description = "Schema for providing the prompt to the generators."
+    description = "Schema for providing the prompt to the generators. Don't use brackets {} in the responses."
 
 
 def agent_initiation(model, feedback=None, rules=None, temperature=0.0):
@@ -17,26 +17,27 @@ def agent_initiation(model, feedback=None, rules=None, temperature=0.0):
 
     base_init_prompt = """You're a VERY SMART AI which is the BRAIN of a clever multi-LLM agent system built to solve puzzles.
         In this case, we're solving ARC-AGI, a set of puzzles that require understanding patterns and rules to transform input grids into output grids.
-        Each ARC-AGI task consists of a set of input-output examples that follow a pattern.
+        Each ARC-AGI task consists of a set of input-output examples that follow a pattern (a rule of transformation from input to output).
+        THE GOAL OF THE WHOLE SYSTEM IS TO DISCOVER WHAT THOSE TRANSFORMATION RULES ARE (they should work for each example in the task).
         
-        As the brain, you should be able to look at some particular task and tell the other AIs what to do in order to solve it.
-        You have at your disposal a set of AIs (typically 5) that you should PROMPT in order for them to generate patterns. 
-        The prompt will be the same for all of them, so you should be able to guide them to generate the non-trivial patterns that solve the task.
+        As the brain, you will be looking at some particular task (set of input-output pairs with the same transformation rule) and tell some other AIs what to do in order to solve it.
+        You have at your disposal a set of AIs (typically 5) that you should PROMPT in order for them to generate a list of possible transformation rules. 
+        The prompt will be the same for all of the AIs, so you should be able to guide them to generate the non-trivial transformation rules that solve the task.
         
-        You need to UNDERSTAND the problem and create the most effective prompt to guide the pattern generators to solve the ARC-AGI tasks.
-        Use the "PromptingTool" tool to structure the output correctly based on the description.
+        You need to UNDERSTAND the problem and create the most effective prompt to guide the pattern generators to solve the ARC-AGI task.
         Explain the problem extensively and give context but don't include the inputs or outputs in the prompt, just the instructions to the AIs (the task will be provided to them).
-        Tell them that they should produce 5 non-trivial patterns that can be used to solve the task and list them. They don't need to generate the outputs, only LIST THE RULES."""
+        Tell them that they should produce 5 non-trivial patterns that can be used to solve the task and list them. They don't need to generate the outputs, only LIST THE RULES.
+        """
     
     if feedback is not None:
         base_init_prompt += f"""\n--------------------------------------------------
         REFLECTION: 
         There has been already previous attempts to solve the task but the evaluator found that the patterns/rules generated were not accurate enough.
         --------------------------------------------------
-        LIST OF PATTERNS/RULES PREVIOUSLY USED WITHOUT SUCCESS (for reflection):
+        LIST OF TRANSFORMATION RULES PREVIOUSLY USED WITHOUT SUCCESS (for reflection):
         {rules}
         --------------------------------------------------
-        RULES APPLIED TO TRAIN TASKS AND FEEDBACK FROM THE EVLUATOR:
+        TRANSFORMATION RULES APPLIED TO TRAIN TASKS AND FEEDBACK FROM THE EVLUATOR:
         {feedback}
         
         --------------------------------------------------
@@ -50,7 +51,8 @@ def agent_initiation(model, feedback=None, rules=None, temperature=0.0):
         f"""{base_init_prompt}
 
         Use the "PromptingTool" tool to structure the output correctly based on the description.
-        Below is the task you need to help the AIs solve:""",
+        
+        Below is the ARC-AGI task that you need to help the AIs to solve:""",
         ),
         ("placeholder", "{messages}"),
     ]
@@ -92,7 +94,7 @@ def node_initiate(state: GraphState, config):
                                 init_model, 
                                 feedback=feedback,
                                 rules=rules,
-                                temperature=0.3
+                                temperature=0.1
                                 )
     
     # Invoke graph
