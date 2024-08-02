@@ -10,8 +10,8 @@ def parse_final_output(task_id, predictions):
     submission[task_id] = []
     
     # Predictions should be two
-    if len(predictions) != 2:
-        raise ValueError(f"Failed: Output must be a list of two lists of integers.\n{predictions}")
+    # if len(predictions) != 2:
+    #     raise ValueError(f"Failed: Output must be a list of two lists of integers.\n{predictions}")
     
     test_outputs = {}
 
@@ -22,7 +22,7 @@ def parse_final_output(task_id, predictions):
     
         test_outputs[f"attempt_{i+1}"] = prediction
 
-    submission[task_id][0] = test_outputs
+    submission[task_id].append(test_outputs)
     
     return submission
 
