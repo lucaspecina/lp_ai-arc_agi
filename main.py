@@ -1,8 +1,7 @@
 import os
-from lp_ai.data.data_processing import load_tasks_from_file, task_sets
+from lp_ai.data.data_processing import load_tasks_from_file, task_sets, json_task_to_string
 from lp_ai.graph.workflow import setup_workflow
-from lp_ai.data.data_processing import json_task_to_string
-from lp_ai.output.scoring import test_task_multiple
+from lp_ai.output.scoring import test_task_multiple, parse_final_output, create_submission_file
 import argparse
 
 
@@ -44,9 +43,13 @@ def main(task_id, num_generators, max_reflections, rounds, initiator_model, comb
             print(test_output)
         final_answers.append(test_output)
 
-    # Display results
-    test_task_multiple(final_answers, challenges, solutions, task_id)
+    # Display results and TODO: select two answers (currently it is just one)
+    final_solution = test_task_multiple(final_answers, challenges, solutions, task_id)
 
+    # Save submission
+    system_name = f"lp_ai-v1_0_0"
+    submission = parse_final_output(task_id, [final_solution])
+    create_submission_file(submission, file_name=f'submissions/{system_name}.json')
 
 
 if __name__ == "__main__":

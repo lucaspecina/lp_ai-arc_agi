@@ -2,6 +2,37 @@ import numpy as np
 from collections import Counter
 import ast
 from lp_ai.data.data_processing import load_tasks_from_file, task_sets
+import json
+
+
+def parse_final_output(task_id, predictions):
+    submission = {}
+    submission[task_id] = []
+    
+    # Predictions should be two
+    if len(predictions) != 2:
+        raise ValueError(f"Failed: Output must be a list of two lists of integers.\n{predictions}")
+    
+    test_outputs = {}
+
+    for i, prediction in enumerate(predictions):
+        # Safety measure to error out if you don't get a list of lists of ints back. This will spark a retry later.
+        if not all(isinstance(sublist, list) and all(isinstance(item, int) for item in sublist) for sublist in prediction):
+            raise ValueError(f"Failed: Output must be a list of lists of integers.\n{prediction}")
+    
+        test_outputs[f"attempt_{i+1}"] = prediction
+
+    submission[task_id][0] = test_outputs
+    
+    return submission
+
+
+def create_submission_file(submission, file_name='submissions/submission.json'):
+    with open(file_name, "w") as file:
+        json.dump(submission, file)
+    
+    print('\n-----------------------------------------------------------------------')
+    print (f"Submission saved to {file_name}")
 
 
 def test_training_examples(training_predictions, task_id):
@@ -101,3 +132,5 @@ def test_task_multiple(final_answers, challenges, solutions, task_id):
         except:
             print(f"Answer {i+1}: Bad format")
             print(answer)
+    
+    return ast.literal_eval(answers_count.most_common(1)[0][0])
