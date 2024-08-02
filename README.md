@@ -13,6 +13,7 @@ So far it's as simple as:
 - **pattern combinator**: takes those patterns, combine them and generate a solution for the test
 - **evaluator**: checks if the solution is correct, scores the output and gives feedback to the generators 
 
+There's a conditional edge for reflection (loop from evaluator to initiator).
  
 ![Workflow Graph](workflow_graph.png)
 
