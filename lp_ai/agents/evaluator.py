@@ -4,15 +4,19 @@ from lp_ai.graph.state import GraphState
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from typing import List
+from langchain_core.tools import tool
 
+# TOOLS
 
-# TOOL
+# TODO: evaluator shouldn't be able to see the training examples real output if it generates the training outputs applying the rules (it might copy them directly)
+
 # Data model
 class EvaluatePatternsTool(BaseModel):
     training_outputs_with_rules: List[str] = Field(description="Generated outputs for the training examples, applying the rules (each training example is one element (string) in the list).")
     score: int = Field(description="Evaluate the patterns/rules and the solutions for the challenges (only one int from 0 to 10).")
     feedback: str = Field(description="Feedback for the combinator on the evaluation. Recommend improvements.")
     description = "Schema for evaluating the patterns applied to the challenge. Don't use brackets {} in the responses."
+
 
 
 def agent_evaluate(combinator_solution, model, temperature=0.0):
@@ -47,7 +51,7 @@ def agent_evaluate(combinator_solution, model, temperature=0.0):
         model_name=model,
         temperature=temperature, 
         max_tokens=1000, 
-        tools=EvaluatePatternsTool, 
+        tools=EvaluatePatternsTool,
     )
     # chain setup
     evaluator_chain = setup_chain(evaluator_prompt, evaluator_llm)

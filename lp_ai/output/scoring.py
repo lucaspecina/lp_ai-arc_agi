@@ -3,7 +3,9 @@ from collections import Counter
 import ast
 from lp_ai.data.data_processing import load_tasks_from_file, task_sets
 
+
 def test_training_examples(training_predictions, task_id):
+    """Compares the training_predictions with the real training outputs for a task."""
     challenges, solutions = load_tasks_from_file(task_sets['training'])
 
     assert len(training_predictions) == len(challenges[task_id]['train']), "Number of training examples and predictions do not match"
@@ -15,8 +17,8 @@ def test_training_examples(training_predictions, task_id):
                 "example": i+1, 
                 "input": train_task['input'], 
                 "output": train_task['output'], 
-                "prediction": training_predictions[i], 
-                "score": training_predictions[i] == train_task['output']})
+                "prediction": ast.literal_eval(training_predictions[i]), 
+                "score": ast.literal_eval(training_predictions[i]) == train_task['output']})
         except:
             training_examples.append({
                 "example": i+1, 
