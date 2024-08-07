@@ -31,9 +31,10 @@ python main.py --num_generators 3 --max_reflections 3 --rounds 2 --initiator_mod
 
 ## Next steps and ideas
 
-- [ ] Make the prompt engineering system more robust and find more effective ways to generate and combine patterns
-    - [ ] Ensure the patterns are non-trivial
-    - [ ] Make the testing of examples (input -> output) more effective and reject patterns that do not meet the criteria
+- [ ] Research and implement some ideas from the LATS paper (Language Agent Tree Search) https://arxiv.org/abs/2310.04406
+    - [ ] Implement a tree-based search algorithm. Also see ToT (Tree of Thoughts) paper https://arxiv.org/abs/2305.10601
+    - [ ] Experiment with different action spaces (rules as units? concepts as units?)
+    - [ ] Experiment with symbolic AI for actions in the tree
 - [ ] Allow the model to (optionally) create code and execute it to test the solutions (instead of outputting the answer directly)
 
 Check out the project https://github.com/users/lucaspecina/projects/1/views/1 for new developments and bug fixes.
