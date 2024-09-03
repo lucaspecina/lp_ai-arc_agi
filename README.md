@@ -31,10 +31,13 @@ python main.py --num_generators 3 --max_reflections 3 --rounds 2 --initiator_mod
 
 ## Next steps and ideas
 
-- [ ] Research and implement some ideas from the LATS paper (Language Agent Tree Search) https://arxiv.org/abs/2310.04406
-    - [ ] Implement a tree-based search algorithm. Also see ToT (Tree of Thoughts) paper https://arxiv.org/abs/2305.10601
-    - [ ] Experiment with different action spaces (rules as units? concepts as units?)
-    - [ ] Experiment with symbolic AI for actions in the tree
+- [ ] Implement MCTS architecture
+    - [ ] Thought as node
+        - [ ] Prompt generator (context + previous thought and critque)
+        - [ ] Intuitions (generate new thoughts)
+        - [ ] Combinator (combine, filters and adds new thoughts)
+    - [ ] Reflection (evaluates and critiques the thought)
+- [ ] Experiment with symbolic AI for actions in the tree
 - [ ] Allow the model to (optionally) create code and execute it to test the solutions (instead of outputting the answer directly)
 
 Check out the project https://github.com/users/lucaspecina/projects/1/views/1 for new developments and bug fixes.
